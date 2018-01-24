@@ -1,0 +1,19 @@
+{
+  "name": "rriegs-wiki",
+  "version": "0.1.0",
+  "description": "A single-page, small-content wiki implemented in Elm.",
+  "main": "index.js",
+  "repository": "git@github.com:rriegs/rriegs-wiki.git",
+  "author": "Ryan Riegel <rriegs@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "micro",
+    "dev": "micro-dev"
+  },
+  "dependencies": {
+    "micro": "^9.1.0"
+  },
+  "devDependencies": {
+    "micro-dev": "^2.2.0"
+  }
+}
