@@ -5,6 +5,37 @@ const mime = require("mime");
 const { send, buffer } = require("micro");
 const { router, get, put, del } = require("microrouter");
 
+const errToHttp = function (code) {
+    switch (code) {
+    case "EINVAL":
+        return 400;
+    case "EPERM":
+    case "EACCES":
+    case "ENAMETOOLONG":
+        return 403;
+    case "ENOENT":
+        return 404;
+    case "EEXIST":
+    case "ENOTDIR":
+    case "EISDIR":
+    case "ENOTEMPTY":
+        return 409;
+    default:
+        return 500;
+    }
+};
+
+const errHandler = function (f) {
+    return async function (req, res) {
+        try {
+            return await f(req, res);
+        }
+        catch (err) {
+            send(res, errToHttp(err.code), err.message);
+        }
+    };
+};
+
 const getPath = async function (req, res) {
     let filePath = "www/" + (req.params._ || "index.html");
     let fileType = mime.getType(filePath) || "text/plain";
@@ -25,8 +56,8 @@ const delData = async function (req, res) {
     send(res, 200);
 }
 
-module.exports = router(
+module.exports = errHandler(router(
     get("/*", getPath),
     put("/data/:file", putData),
     del("/data/:file", delData)
-);
+));
