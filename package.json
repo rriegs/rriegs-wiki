@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "micro",
-    "dev": "micro-dev"
+    "dev": "micro-dev -i www"
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
