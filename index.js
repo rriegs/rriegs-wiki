@@ -59,5 +59,6 @@ const delData = async function (req, res) {
 module.exports = errHandler(router(
     get("/*", getPath),
     put("/data/:file", putData),
-    del("/data/:file", delData)
+    del("/data/:file", delData),
+    function (req, res) { send(res, 405); }
 ));
