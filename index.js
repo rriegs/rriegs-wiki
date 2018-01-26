@@ -45,6 +45,7 @@ const getPath = async function (req, res) {
 };
 
 const putData = async function (req, res) {
+    if (!req.params._) return;
     let dataPath = "www/data/" + req.params._;
     await fs.ensureDir(path.dirname(dataPath));
     await fs.writeFile(dataPath, await buffer(req));
@@ -52,6 +53,7 @@ const putData = async function (req, res) {
 }
 
 const delData = async function (req, res) {
+    if (!req.params._) return;
     let dataPath = "www/data/" + req.params._;
     await fs.unlink(dataPath);
     try {
