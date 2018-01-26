@@ -2,6 +2,7 @@
 
 const fs = require("fs-extra");
 const mime = require("mime");
+const path = require("path");
 const { send, buffer } = require("micro");
 const { router, get, put, del } = require("microrouter");
 
@@ -44,21 +45,21 @@ const getPath = async function (req, res) {
 };
 
 const putData = async function (req, res) {
-    await fs.ensureDir("www/data");
-    let dataPath = "www/data/" + req.params.file;
+    let dataPath = "www/data/" + req.params._;
+    await fs.ensureDir(path.dirname(dataPath));
     await fs.writeFile(dataPath, await buffer(req));
     send(res, 200);
 }
 
 const delData = async function (req, res) {
-    let dataPath = "www/data/" + req.params.file;
+    let dataPath = "www/data/" + req.params._;
     await fs.unlink(dataPath);
     send(res, 200);
 }
 
 module.exports = errHandler(router(
     get("/*", getPath),
-    put("/data/:file", putData),
-    del("/data/:file", delData),
+    put("/data/*", putData),
+    del("/data/*", delData),
     function (req, res) { send(res, 405); }
 ));
