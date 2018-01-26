@@ -54,6 +54,14 @@ const putData = async function (req, res) {
 const delData = async function (req, res) {
     let dataPath = "www/data/" + req.params._;
     await fs.unlink(dataPath);
+    try {
+        while (
+            (dataPath = path.dirname(dataPath)) !== "www/data"
+        ) {
+            await fs.rmdir(dataPath);
+        }
+    }
+    catch (err) {}
     send(res, 200);
 }
 
