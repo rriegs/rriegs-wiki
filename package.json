@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "start": "micro",
-    "dev": "micro-dev -i www"
+    "dev": "micro-dev -i www",
+    "build": "elm-make src/Main.elm --output www/main.html"
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
@@ -17,6 +18,7 @@
     "mime": "^2.2.0"
   },
   "devDependencies": {
+    "elm": "^0.18.0",
     "micro-dev": "^2.2.0"
   }
 }
