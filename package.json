@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "micro",
-    "dev": "micro-dev -i www",
+    "dev": "micro-dev -w index.js & npm run watch",
     "build": "elm-make src/Main.elm --output www/main.html",
     "watch": "chokidar 'src/**/*.elm' -c 'npm run build' --initial"
   },
