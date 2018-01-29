@@ -9,7 +9,8 @@
   "scripts": {
     "start": "micro",
     "dev": "micro-dev -i www",
-    "build": "elm-make src/Main.elm --output www/main.html"
+    "build": "elm-make src/Main.elm --output www/main.html",
+    "watch": "chokidar 'src/**/*.elm' -c 'npm run build' --initial"
   },
   "dependencies": {
     "fs-extra": "^5.0.0",
@@ -18,6 +19,7 @@
     "mime": "^2.2.0"
   },
   "devDependencies": {
+    "chokidar-cli": "^1.2.0",
     "elm": "^0.18.0",
     "micro-dev": "^2.2.0"
   }
