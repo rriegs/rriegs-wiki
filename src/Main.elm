@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Html
+import RemoteData
 
 type alias Model =
     { topics : List Topic
@@ -8,6 +9,11 @@ type alias Model =
 
 type alias Topic =
     { title : String
+    , content : RemoteData.WebData TopicContent
+    }
+
+type alias TopicContent =
+    { source : String
     }
 
 type Msg
@@ -15,7 +21,10 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    Model [ Topic "Hello", Topic "Topics" ]
+    Model
+        [ Topic "Hello" RemoteData.NotAsked
+        , Topic "RemoteData" RemoteData.NotAsked
+        ]
         ! []
 
 view : Model -> Html.Html Msg
@@ -26,6 +35,14 @@ viewTopic : Topic -> Html.Html Msg
 viewTopic topic =
     Html.div []
         [ Html.h2 [] [ Html.text topic.title ]
+        , case topic.content of
+              RemoteData.NotAsked -> Html.text ""
+
+              RemoteData.Loading -> Html.text "Loading"
+
+              RemoteData.Failure error -> Html.text (toString error)
+
+              RemoteData.Success content -> Html.text content.source
         ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
