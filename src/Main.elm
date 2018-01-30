@@ -2,18 +2,31 @@ module Main exposing (main)
 
 import Html
 
-type alias Model = String
+type alias Model =
+    { topics : List Topic
+    }
+
+type alias Topic =
+    { title : String
+    }
 
 type Msg
     = NoOp
 
 init : ( Model, Cmd Msg )
 init =
-    "Hello Elm Architecture!" ! []
+    Model [ Topic "Hello", Topic "Topics" ]
+        ! []
 
 view : Model -> Html.Html Msg
 view model =
-    Html.text model
+    Html.div [] (List.map viewTopic model.topics)
+
+viewTopic : Topic -> Html.Html Msg
+viewTopic topic =
+    Html.div []
+        [ Html.h2 [] [ Html.text topic.title ]
+        ]
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
