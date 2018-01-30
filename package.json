@@ -9,7 +9,7 @@
   "scripts": {
     "start": "micro",
     "dev": "micro-dev -w index.js & npm run watch",
-    "build": "elm-make src/Main.elm --output www/main.html --warn --yes",
+    "build": "elm-make src/Main.elm --output www/elm.main.html --warn --yes",
     "watch": "chokidar 'src/**/*.elm' -c 'npm run build' --initial"
   },
   "dependencies": {
