@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Html
+import Html.Events
 import Http
 import RemoteData
 
@@ -22,6 +23,7 @@ type alias TopicContent =
 type Msg
     = NoOp
     | OnGetTopic String (RemoteData.WebData String)
+    | OnEdit String String
 
 init : ( Model, Cmd Msg )
 init =
@@ -62,7 +64,15 @@ viewTopic topic =
 
               RemoteData.Failure error -> Html.text (toString error)
 
-              RemoteData.Success content -> Html.text content.source
+              RemoteData.Success content ->
+                  Html.div []
+                      [ Html.div [] [ Html.text content.source ]
+                      , Html.div []
+                            [ Html.textarea
+                                  [ Html.Events.onInput (OnEdit topic.title) ]
+                                  [ Html.text content.source ]
+                            ]
+                      ]
         ]
 
 
@@ -74,6 +84,10 @@ update msg model =
 
         OnGetTopic title response ->
             Model (List.map (updateTopic title response) model.topics)
+                ! []
+
+        OnEdit title source ->
+            Model (List.map (updateTopic title (RemoteData.Success source)) model.topics)
                 ! []
 
 updateTopic : String -> RemoteData.WebData String -> Topic -> Topic
