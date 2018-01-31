@@ -62,17 +62,22 @@ viewTopic topic =
 
               RemoteData.Loading -> Html.text "Loading"
 
-              RemoteData.Failure error -> Html.text (toString error)
+              RemoteData.Failure error ->
+                  viewEditor topic.title (toString error) ""
 
               RemoteData.Success content ->
-                  Html.div []
-                      [ Html.div [] [ Html.text content.source ]
-                      , Html.div []
-                            [ Html.textarea
-                                  [ Html.Events.onInput (OnEdit topic.title) ]
-                                  [ Html.text content.source ]
-                            ]
-                      ]
+                  viewEditor topic.title content.source content.source
+        ]
+
+viewEditor : String -> String -> String -> Html.Html Msg
+viewEditor title body source =
+    Html.div []
+        [ Html.div [] [ Html.text body ]
+        , Html.div []
+            [ Html.textarea
+                  [ Html.Events.onInput (OnEdit title) ]
+                  [ Html.text source ]
+            ]
         ]
 
 
