@@ -24,13 +24,14 @@ type Msg
     = NoOp
     | OnGetTopic String (RemoteData.WebData String)
     | OnEdit String String
+    | OnSave String String
 
 init : ( Model, Cmd Msg )
 init =
     let
         titles =
             [ "Hello"
-            , "GET"
+            , "PUT"
             ]
 
         createTopic title =
@@ -46,6 +47,19 @@ getTopic title =
     Http.getString ("data/" ++ title ++ ".md")
         |> RemoteData.sendRequest
         |> Cmd.map (OnGetTopic title)
+
+putTopic : String -> String -> Cmd Msg
+putTopic title source =
+    Http.request
+        { method = "PUT"
+        , headers = []
+        , url = "data/" ++ title ++ ".md"
+        , body = Http.stringBody "text/plain" source
+        , expect = Http.expectStringResponse (\_ -> Ok ())
+        , timeout = Nothing
+        , withCredentials = False
+        }
+        |> Http.send (\_ -> NoOp)
 
 
 
@@ -78,6 +92,11 @@ viewEditor title body source =
                   [ Html.Events.onInput (OnEdit title) ]
                   [ Html.text source ]
             ]
+        , Html.div []
+            [ Html.button
+                  [ Html.Events.onClick (OnSave title source) ]
+                  [ Html.text "Save" ]
+            ]
         ]
 
 
@@ -94,6 +113,10 @@ update msg model =
         OnEdit title source ->
             Model (List.map (updateTopic title (RemoteData.Success source)) model.topics)
                 ! []
+
+        OnSave title source ->
+            model
+                ! [ putTopic title source ]
 
 updateTopic : String -> RemoteData.WebData String -> Topic -> Topic
 updateTopic title response topic =
