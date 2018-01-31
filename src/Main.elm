@@ -1,7 +1,10 @@
 module Main exposing (main)
 
 import Html
+import Http
 import RemoteData
+
+
 
 type alias Model =
     { topics : List Topic
@@ -18,14 +21,31 @@ type alias TopicContent =
 
 type Msg
     = NoOp
+    | OnGetTopic String (RemoteData.WebData String)
 
 init : ( Model, Cmd Msg )
 init =
-    Model
-        [ Topic "Hello" RemoteData.NotAsked
-        , Topic "RemoteData" RemoteData.NotAsked
-        ]
-        ! []
+    let
+        titles =
+            [ "Hello"
+            , "GET"
+            ]
+
+        createTopic title =
+            Topic title RemoteData.Loading
+    in
+        Model (List.map createTopic titles)
+            ! List.map getTopic titles
+
+
+
+getTopic : String -> Cmd Msg
+getTopic title =
+    Http.getString ("data/" ++ title ++ ".md")
+        |> RemoteData.sendRequest
+        |> Cmd.map (OnGetTopic title)
+
+
 
 view : Model -> Html.Html Msg
 view model =
@@ -45,13 +65,31 @@ viewTopic topic =
               RemoteData.Success content -> Html.text content.source
         ]
 
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    model ! []
+    case msg of
+        NoOp -> model ! []
+
+        OnGetTopic title response ->
+            Model (List.map (updateTopic title response) model.topics)
+                ! []
+
+updateTopic : String -> RemoteData.WebData String -> Topic -> Topic
+updateTopic title response topic =
+    if (topic.title == title) then
+        Topic title (RemoteData.map TopicContent response)
+    else
+        topic
+
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
 
 main : Program Never Model Msg
 main =
