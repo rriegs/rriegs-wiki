@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test GET, PUT, and DELETE</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  </head>
+  <body>
+    <fieldset>
+      <div>
+        <input type="text" id="file" />
+        <label for="file">file</label>
+        <br>
+        <input type="text" id="contents" />
+        <label for="contents">contents</label>
+      </div>
+      <input type="button" id="get" value="GET" />
+      <input type="button" id="put" value="PUT" />
+      <input type="button" id="del" value="DELETE" />
+      <div id="msg" />
+    </fieldset>
+    <script>
+      $("#get").click(function () {
+        $.ajax({
+          type: "GET",
+          url: "/data/" + $("#file").val()
+        }).done(function (res) {
+          $("#msg").html("success: <pre>" + res + "</pre>");
+        }).fail(function (err) {
+          $("#msg").html("failure: <pre>" + JSON.stringify(err, null, 2) + "</pre>");
+        });
+      });
+      $("#put").click(function () {
+        $.ajax({
+          type: "PUT",
+          url: "/data/" + $("#file").val(),
+          contentType: "text/plain",
+          data: $("#contents").val()
+        }).done(function (res) {
+          $("#msg").html("success");
+        }).fail(function (err) {
+          $("#msg").html("failure: <pre>" + JSON.stringify(err, null, 2) + "</pre>");
+        });
+      });
+      $("#del").click(function () {
+        $.ajax({
+          type: "DELETE",
+          url: "/data/" + $("#file").val()
+        }).done(function (res) {
+          $("#msg").html("success");
+        }).fail(function (err) {
+          $("#msg").html("failure: <pre>" + JSON.stringify(err, null, 2) + "</pre>");
+        });
+      });
+    </script>
+  </body>
+</html>
