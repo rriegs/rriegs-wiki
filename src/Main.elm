@@ -33,6 +33,7 @@ type Msg
     | OnClose String
     | OnEdit String String
     | OnSave String String
+    | OnDelete String
 
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
@@ -64,6 +65,19 @@ putTopic title source =
         , headers = []
         , url = "data/" ++ title ++ ".md"
         , body = Http.stringBody "text/plain" source
+        , expect = Http.expectStringResponse (\_ -> Ok ())
+        , timeout = Nothing
+        , withCredentials = False
+        }
+        |> Http.send (\_ -> NoOp)
+
+delTopic : String -> Cmd Msg
+delTopic title =
+    Http.request
+        { method = "DELETE"
+        , headers = []
+        , url = "data/" ++ title ++ ".md"
+        , body = Http.emptyBody
         , expect = Http.expectStringResponse (\_ -> Ok ())
         , timeout = Nothing
         , withCredentials = False
@@ -124,6 +138,9 @@ viewEditor title body source =
             [ Html.button
                   [ Html.Events.onClick (OnSave title source) ]
                   [ Html.text "Save" ]
+            , Html.button
+                  [ Html.Events.onClick (OnDelete title) ]
+                  [ Html.text "Delete" ]
             ]
         ]
 
@@ -162,6 +179,10 @@ update msg model =
         OnSave title source ->
             model
                 ! [ putTopic title source ]
+
+        OnDelete title ->
+            model
+                ! [ delTopic title ]
 
 updateTopic : String -> RemoteData.WebData String -> Topic -> Topic
 updateTopic title response topic =
