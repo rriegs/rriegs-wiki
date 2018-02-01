@@ -87,7 +87,10 @@ view model =
 
 viewTopic : Topic -> Html.Html Msg
 viewTopic topic =
-    Html.div [ Html.Attributes.id topic.title ]
+    Html.div
+        [ Html.Attributes.class "topic"
+        , Html.Attributes.id topic.title
+        ]
         [ Html.h2 [] [ Html.text topic.title ]
         , Html.div []
             [ Html.button
@@ -112,7 +115,9 @@ viewEditor title body source =
         [ body
         , Html.div []
             [ Html.textarea
-                  [ Html.Events.onInput (OnEdit title) ]
+                  [ Html.Attributes.class "editor"
+                  , Html.Events.onInput (OnEdit title)
+                  ]
                   [ Html.text source ]
             ]
         , Html.div []
