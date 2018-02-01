@@ -30,6 +30,7 @@ type Msg
     = NoOp
     | OnLocationChange Navigation.Location
     | OnGetTopic String (RemoteData.WebData String)
+    | OnClose String
     | OnEdit String String
     | OnSave String String
 
@@ -88,6 +89,11 @@ viewTopic : Topic -> Html.Html Msg
 viewTopic topic =
     Html.div [ Html.Attributes.id topic.title ]
         [ Html.h2 [] [ Html.text topic.title ]
+        , Html.div []
+            [ Html.button
+                  [ Html.Events.onClick (OnClose topic.title) ]
+                  [ Html.text "Close" ]
+            ]
         , case topic.content of
               RemoteData.NotAsked -> Html.text ""
 
@@ -139,6 +145,10 @@ update msg model =
         OnGetTopic title response ->
             Model (List.map (updateTopic title response) model.topics)
                 ! []
+
+        OnClose title ->
+            Model (List.filter (\topic -> topic.title /= title) model.topics)
+                ! [ Navigation.newUrl "#" ]
 
         OnEdit title source ->
             Model (List.map (updateTopic title (RemoteData.Success source)) model.topics)
