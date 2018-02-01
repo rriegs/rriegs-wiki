@@ -1,11 +1,13 @@
 module Main exposing (main)
 
+import Dom.Scroll
 import Html
 import Html.Events
 import Http
 import Markdown
 import Navigation
 import RemoteData
+import Task
 
 
 
@@ -68,6 +70,15 @@ putTopic title source =
 
 
 
+scrollToTop : Cmd Msg
+scrollToTop =
+    Cmd.batch
+        [ Task.attempt (\_ -> NoOp) (Dom.Scroll.toTop "html")
+        , Task.attempt (\_ -> NoOp) (Dom.Scroll.toTop "body")
+        ]
+
+
+
 view : Model -> Html.Html Msg
 view model =
     Html.div [] (List.map viewTopic model.topics)
@@ -120,7 +131,7 @@ update msg model =
                         model ! []
                     else
                         Model (Topic title RemoteData.Loading :: model.topics)
-                            ! [ getTopic title ]
+                            ! [ getTopic title, scrollToTop ]
             else
                 model ! []
 
