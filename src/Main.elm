@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Dom.Scroll
 import Html
+import Html.Attributes
 import Html.Events
 import Http
 import Markdown
@@ -85,7 +86,7 @@ view model =
 
 viewTopic : Topic -> Html.Html Msg
 viewTopic topic =
-    Html.div []
+    Html.div [ Html.Attributes.id topic.title ]
         [ Html.h2 [] [ Html.text topic.title ]
         , case topic.content of
               RemoteData.NotAsked -> Html.text ""
