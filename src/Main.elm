@@ -4,6 +4,7 @@ import Html
 import Html.Events
 import Http
 import Markdown
+import Navigation
 import RemoteData
 
 
@@ -24,17 +25,19 @@ type alias TopicContent =
 
 type Msg
     = NoOp
+    | OnLocationChange Navigation.Location
     | OnGetTopic String (RemoteData.WebData String)
     | OnEdit String String
     | OnSave String String
 
-init : ( Model, Cmd Msg )
-init =
+init : Navigation.Location -> ( Model, Cmd Msg )
+init location =
     let
         titles =
-            [ "Hello"
-            , "Markdown"
-            ]
+            if String.startsWith "#" location.hash then
+                [ String.dropLeft 1 location.hash ]
+            else
+                [ "Hello" ]
 
         createTopic title =
             Topic title RemoteData.Loading
@@ -108,6 +111,19 @@ update msg model =
     case msg of
         NoOp -> model ! []
 
+        OnLocationChange location ->
+            if String.startsWith "#" location.hash then
+                let
+                    title = String.dropLeft 1 location.hash
+                in
+                    if List.any (\topic -> topic.title == title) model.topics then
+                        model ! []
+                    else
+                        Model (Topic title RemoteData.Loading :: model.topics)
+                            ! [ getTopic title ]
+            else
+                model ! []
+
         OnGetTopic title response ->
             Model (List.map (updateTopic title response) model.topics)
                 ! []
@@ -141,7 +157,7 @@ subscriptions model =
 
 main : Program Never Model Msg
 main =
-    Html.program
+    Navigation.program OnLocationChange
         { init = init
         , view = view
         , update = update
