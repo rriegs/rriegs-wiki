@@ -3,6 +3,7 @@ module Main exposing (main)
 import Html
 import Html.Events
 import Http
+import Markdown
 import RemoteData
 
 
@@ -18,6 +19,7 @@ type alias Topic =
 
 type alias TopicContent =
     { source : String
+    , body : Html.Html Msg
     }
 
 type Msg
@@ -31,7 +33,7 @@ init =
     let
         titles =
             [ "Hello"
-            , "PUT"
+            , "Markdown"
             ]
 
         createTopic title =
@@ -77,16 +79,16 @@ viewTopic topic =
               RemoteData.Loading -> Html.text "Loading"
 
               RemoteData.Failure error ->
-                  viewEditor topic.title (toString error) ""
+                  viewEditor topic.title (Html.text (toString error)) ""
 
               RemoteData.Success content ->
-                  viewEditor topic.title content.source content.source
+                  viewEditor topic.title content.body content.source
         ]
 
-viewEditor : String -> String -> String -> Html.Html Msg
+viewEditor : String -> Html.Html Msg -> String -> Html.Html Msg
 viewEditor title body source =
     Html.div []
-        [ Html.div [] [ Html.text body ]
+        [ body
         , Html.div []
             [ Html.textarea
                   [ Html.Events.onInput (OnEdit title) ]
@@ -120,10 +122,14 @@ update msg model =
 
 updateTopic : String -> RemoteData.WebData String -> Topic -> Topic
 updateTopic title response topic =
-    if (topic.title == title) then
-        Topic title (RemoteData.map TopicContent response)
-    else
-        topic
+    let
+        createTopicContent source =
+            TopicContent source (Markdown.toHtml [] source)
+    in
+        if (topic.title == title) then
+            Topic title (RemoteData.map createTopicContent response)
+        else
+            topic
 
 
 
