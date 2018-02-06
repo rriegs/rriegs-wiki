@@ -1,11 +1,10 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Dom.Scroll
 import Html
 import Html.Attributes
 import Html.Events
 import Http
-import Markdown
 import Navigation
 import RemoteData
 import Task
@@ -30,6 +29,7 @@ type Msg
     = NoOp
     | OnLocationChange Navigation.Location
     | OnGetTopic String (RemoteData.WebData String)
+    | OnMarkdownHtml ( String, String, String )
     | OnClose String
     | OnEdit String String
     | OnSave String String
@@ -165,7 +165,14 @@ update msg model =
                 model ! []
 
         OnGetTopic title response ->
-            Model (List.map (updateTopic title response) model.topics)
+            Model (List.map (updateTopic title (RemoteData.map (\source -> ( source, "Parsing" )) response)) model.topics)
+                ! case response of
+                      RemoteData.Success source ->
+                          [ parseMarkdown ( title, source ) ]
+                      _ -> []
+
+        OnMarkdownHtml ( title, source, rawHtml ) ->
+            Model (List.map (updateTopic title (RemoteData.Success ( source, rawHtml ))) model.topics)
                 ! []
 
         OnClose title ->
@@ -173,8 +180,8 @@ update msg model =
                 ! [ Navigation.newUrl "#" ]
 
         OnEdit title source ->
-            Model (List.map (updateTopic title (RemoteData.Success source)) model.topics)
-                ! []
+            Model (List.map (updateTopic title (RemoteData.Success ( source, "Parsing" ))) model.topics)
+                ! [ parseMarkdown ( title, source ) ]
 
         OnSave title source ->
             model
@@ -184,11 +191,11 @@ update msg model =
             model
                 ! [ delTopic title ]
 
-updateTopic : String -> RemoteData.WebData String -> Topic -> Topic
+updateTopic : String -> RemoteData.WebData ( String, String ) -> Topic -> Topic
 updateTopic title response topic =
     let
-        createTopicContent source =
-            TopicContent source (Markdown.toHtml [] source)
+        createTopicContent ( source, rawHtml ) =
+            TopicContent source (Html.text rawHtml)
     in
         if (topic.title == title) then
             Topic title (RemoteData.map createTopicContent response)
@@ -199,9 +206,13 @@ updateTopic title response topic =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    markdownHtml OnMarkdownHtml
 
 
+
+port parseMarkdown : ( String, String ) -> Cmd msg
+
+port markdownHtml : (( String, String, String ) -> msg) -> Sub msg
 
 main : Program Never Model Msg
 main =

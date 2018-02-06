@@ -4,10 +4,19 @@
     <title>RriegsWiki</title>
     <link rel="stylesheet" href="styles.css">
     <script src="elm.main.js"></script>
+    <script src="markdown-it.min.js"></script>
   </head>
   <body id="body">
     <script>
-      Elm.Main.fullscreen();
+      var app = Elm.Main.fullscreen();
+      var md = window.markdownit();
+
+      app.ports.parseMarkdown.subscribe(function (args) {
+        let title = args[0];
+        let source = args[1];
+        let rawHtml = md.render(source);
+        app.ports.markdownHtml.send([title, source, rawHtml]);
+      });
     </script>
   </body>
 </html>
