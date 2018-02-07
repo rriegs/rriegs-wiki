@@ -4,6 +4,8 @@ import Dom.Scroll
 import Html
 import Html.Attributes
 import Html.Events
+import HtmlParser
+import HtmlParser.Util
 import Http
 import Navigation
 import RemoteData
@@ -22,7 +24,7 @@ type alias Topic =
 
 type alias TopicContent =
     { source : String
-    , body : Html.Html Msg
+    , body : List (Html.Html Msg)
     }
 
 type Msg
@@ -117,16 +119,16 @@ viewTopic topic =
               RemoteData.Loading -> Html.text "Loading"
 
               RemoteData.Failure error ->
-                  viewEditor topic.title (Html.text (toString error)) ""
+                  viewEditor topic.title [ Html.text (toString error) ] ""
 
               RemoteData.Success content ->
                   viewEditor topic.title content.body content.source
         ]
 
-viewEditor : String -> Html.Html Msg -> String -> Html.Html Msg
+viewEditor : String -> List (Html.Html Msg) -> String -> Html.Html Msg
 viewEditor title body source =
     Html.div []
-        [ body
+        [ Html.div [] body
         , Html.div []
             [ Html.textarea
                   [ Html.Attributes.class "editor"
@@ -195,7 +197,9 @@ updateTopic : String -> RemoteData.WebData ( String, String ) -> Topic -> Topic
 updateTopic title response topic =
     let
         createTopicContent ( source, rawHtml ) =
-            TopicContent source (Html.text rawHtml)
+            HtmlParser.parse rawHtml
+                |> HtmlParser.Util.toVirtualDom
+                |> TopicContent source
     in
         if (topic.title == title) then
             Topic title (RemoteData.map createTopicContent response)
